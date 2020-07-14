@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() {
   runApp(MyApp());
@@ -47,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    ScreenUtil.init();
     Timer.run(() {
       _checkLevel(0);
     });
@@ -54,10 +56,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _checkLevel(int sel) {
     String titleText, bodyText;
-    //sel=0->game is initially start..
-    //sel=1->level is done and target was acheived..
-    //sel=2->change level..
-    //sel=3->game was Over and playagain..
+    //*sel=0->game is initially start..
+    //*sel=1->level is done and target was acheived..
+    //*sel=2->change level..
+    //*sel=3->game was Over and playagain..
     switch (sel) {
       case 0:
         {
@@ -232,12 +234,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            Padding(
+            Container(
+              height: screenHeight * 0.05,
               padding:
                   const EdgeInsets.symmetric(vertical: 2, horizontal: 12.0),
               child: Row(
@@ -256,11 +261,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      padding: EdgeInsets.all(2),
                       child: Text(
-                        'Run',
+                        '▶️ Start ',
                         style: TextStyle(
                           color: Theme.of(context).backgroundColor,
-                          fontSize: 34,
+                          fontSize: ScreenUtil().setSp(50),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -270,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     '@ C r e a t e d  b y  L o a y M H .. ',
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
-                      fontSize: 17,
+                      fontSize: ScreenUtil().setSp(36),
                       fontWeight: FontWeight.bold,
                     ),
                   )
@@ -308,6 +314,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         currGridColor = Theme.of(context).backgroundColor;
                       return Center(
                         child: Container(
+                          width: screenWidth / 20,
+                          height: (screenHeight * 0.9) / (numOfSquares / 20),
                           padding: EdgeInsets.all(2),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(5),
@@ -322,7 +330,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-            Padding(
+            Container(
+              height: screenHeight * 0.05,
               padding:
                   const EdgeInsets.symmetric(vertical: 2, horizontal: 12.0),
               child: Row(
@@ -332,7 +341,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Your score is $score / $targetScore',
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
-                      fontSize: 30,
+                      fontSize: ScreenUtil().setSp(80),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -351,7 +360,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           'Level',
                           style: TextStyle(
                             color: Theme.of(context).backgroundColor,
-                            fontSize: 20,
+                            fontSize: ScreenUtil().setSp(50),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
