@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -18,14 +19,21 @@ class _MyHomePageState extends State<MyHomePage> {
   static var randomNum = Random();
   int food = randomNum.nextInt(numOfSquares - 1);
   bool changeLevel = false, gameIsRunning = false;
-  int targetScore = 20;
-  int oldTarget = 20;
+  String targetLevel = 'Easy';
+  String oldTarget = 'Easy';
   final player = AudioCache();
+  SharedPreferences sharedPreferences;
+  int highScore = 0;
+
+  Future<void> _getPreference() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+  }
 
   @override
   void initState() {
     super.initState();
-    //audioPlayer = AudioPlayer(mode: PlayerMode.LOW_LATENCY);
+    _getPreference();
+    highScore = _getHighScore();
     ScreenUtil.init();
     Timer.run(() {
       _checkLevel(0);
@@ -49,20 +57,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void _checkLevel(int sel) {
     String titleText, bodyText;
     //*sel=0->game is initially start..
-    //*sel=1->level is done and target was acheived..
-    //*sel=2->change level..
-    //*sel=3->game was Over and playagain..
+    //*sel=1->change level..
+    //*sel=2->game was Over and playagain..
     switch (sel) {
       case 0:
         {
           titleText = 'WELCOME TO SNAKE GAME!!';
           bodyText = 'Choose a Level to start the game:';
-          break;
-        }
-      case 1:
-        {
-          titleText = 'YESS: The TARGET is Acheived!!';
-          bodyText = 'Choose another Level to try this time:';
           break;
         }
       case 2:
@@ -89,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
               FlatButton(
                 onPressed: () {
                   time = 250;
-                  targetScore = 20;
+                  targetLevel = 'Easy';
                   Navigator.of(context).pop();
                 },
                 child: Text('Easy'),
@@ -97,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
               FlatButton(
                 onPressed: () {
                   time = 150;
-                  targetScore = 25;
+                  targetLevel = 'Medium';
                   Navigator.of(context).pop();
                 },
                 child: Text('Medium'),
@@ -105,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
               FlatButton(
                 onPressed: () {
                   time = 50;
-                  targetScore = 30;
+                  targetLevel = 'Hard';
                   Navigator.of(context).pop();
                 },
                 child: Text('Hard'),
@@ -129,29 +130,42 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  int _getHighScore() {
+    if (sharedPreferences != null)
+      return sharedPreferences.getInt('highscore');
+    else
+      return 0;
+  }
+
+  void _setHighScore() {
+    int prevHighScore = _getHighScore();
+    if (score > prevHighScore) {
+      sharedPreferences.setInt('highscore', score);
+    }
+    highScore = prevHighScore;
+  }
+
   void startGame() {
     var duration = Duration(milliseconds: time);
     Timer.periodic(duration, (timer) {
-      oldTarget = targetScore;
+      oldTarget = targetLevel;
       gameIsRunning = true;
       //this is done each frame after the delay:
       updateSnake();
-      if (score >= targetScore) {
-        timer.cancel();
-        gameIsRunning = false;
-        _checkLevel(1);
-      }
+
       if (changeLevel) {
         timer.cancel();
         gameIsRunning = false;
-        _checkLevel(2);
+        _setHighScore();
+        _checkLevel(1);
         changeLevel = false;
       }
       if (gameOver() && snakePosition.length != 3) {
         timer.cancel();
         gameIsRunning = false;
         snakePosition = [35, 55, 75];
-        _checkLevel(3);
+        _setHighScore();
+        _checkLevel(2);
       }
     });
   }
@@ -243,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   GestureDetector(
                     onTap: () {
-                      if (oldTarget != targetScore) {
+                      if (oldTarget != targetLevel) {
                         snakePosition = [35, 55, 75];
                         score = 0;
                       }
@@ -331,10 +345,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   Text(
-                    'Your score is $score / $targetScore',
+                    'Your Score = $score',
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
-                      fontSize: ScreenUtil().setSp(80),
+                      fontSize: ScreenUtil().setSp(70),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '🔝{$targetLevel} = $highScore',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: ScreenUtil().setSp(40),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
