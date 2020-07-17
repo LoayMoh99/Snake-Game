@@ -11,13 +11,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  //AudioPlayer audioPlayer;
+  //list for storing the positions of the snake..
   static List<int> snakePosition = [35, 55, 75];
   int score = 3;
+  //time in millisec for delay between drawing each frame
   int time = 250;
+  //num of squares drawn for the playground
   static int numOfSquares = 560;
   static var randomNum = Random();
   int food = randomNum.nextInt(numOfSquares - 1);
+  //all these helps in stopping the game level
   bool changeLevel = false, gameIsRunning = false;
   String targetLevel = 'Easy';
   String oldTarget = 'Easy';
@@ -46,14 +49,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void playLocal() {
-    // await audioPlayer.play(
-    //   'assets/crunch.mp4',
-    //   isLocal: true,
-    // );
-    // call this method when desired
     player.play('crunch.mp4');
   }
 
+  ///this finction not only is diplayed at first to check the starting level
+  ///
+  ///it is also for showing when change level is checked
+  ///and when game is over..
   void _checkLevel(int sel) {
     String titleText, bodyText;
     //*sel=0->game is initially start..
@@ -182,7 +184,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return false;
   }
 
-  String direction = 'down';
+  String direction = 'down'; //initial direction
   void updateSnake() {
     setState(() {
       switch (direction) {
